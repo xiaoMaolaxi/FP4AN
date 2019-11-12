@@ -26,7 +26,8 @@ int Init_FP_Context(const char* url, FP_Context& FP_Context)
     if(ret != 0)
         goto ERR_END;
 
-    ret = Init_FP_Codec(FP_Context, true);
+    // default use sw decode
+    ret = Init_FP_Codec(FP_Context, false);
     if(ret != 0)
         goto ERR_END;
     //av_log_set_callback(log_callback_test2);
@@ -49,6 +50,7 @@ int Init_FP_Context(const char* url, FP_Context& FP_Context)
 }
 void QuitAndRelease_FP(FP_Context& FP_Context)
 {
+    FFLOGE("QuitAndRelease_FP enter");
     if(FP_Context.fmt_ctx != NULL)
         avformat_close_input(&FP_Context.fmt_ctx);
     if(FP_Context.VCodecC != NULL)
