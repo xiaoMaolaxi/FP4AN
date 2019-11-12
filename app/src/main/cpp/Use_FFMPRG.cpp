@@ -1,9 +1,9 @@
 //
 // Created by PLX on 2019/11/10.
 //
-#include <InitFFMPEG.h>
+#include <Use_FFMPEG.h>
 #include "../../../../include/libavformat/avformat.h"
-#include "InitFFMPEG.h"
+#include "Use_FFMPEG.h"
 #include "../../../../include/libavcodec/avcodec.h"
 
 int Init_FP_Context(const char* url, FP_Context& FP_Context)
@@ -43,7 +43,7 @@ int Init_FP_Context(const char* url, FP_Context& FP_Context)
     }
     return ret;
 
-    ERR_END:
+ERR_END:
         FFLOGE("we got err msg, %s", av_err2str(ret));
         QuitAndRelease_FP(FP_Context);
         return ret;
@@ -158,4 +158,72 @@ int Init_FP_Codec(FP_Context& FP_Context, bool isHWdecode)
     }
     FFLOGE("open decoder AudioCodeID:%d, codec_type:%d", FP_Context.AudioCodeID, FP_Context.ACodecC->codec_type);
     return ret;
+}
+
+AVFrame* Use_FP_GetDecodeFrame(FP_Context& FP_Context, AVMediaType PkgType)
+{
+    int ret = 0;
+    AVPacket* pgk = av_packet_alloc();
+    AVFrame* avFrame = av_frame_alloc();
+
+    if(AVMEDIA_TYPE_AUDIO == PkgType)
+    {
+        FFLOGE("sorry not support audio yeah");
+        return NULL;
+    }
+    if(AVMEDIA_TYPE_VIDEO == PkgType)
+    {
+        for(;;)
+        {
+            ret = av_read_frame(FP_Context.fmt_ctx, pgk);
+            if(ret < 0)
+            {
+                FFLOGE("read stream eof, info:%s", av_err2str(ret));
+                av_packet_unref(pgk);
+                goto DecodeEND;
+            }
+            else
+            {
+                if(pgk->stream_index != FP_Context.videostreamID)
+                {
+                    //FFLOGE("read video stream videostreamID:%d, duration:%lld, pts:%lld, dts:%lld, size:%d, pos:%lld",
+                    //        pgk->stream_index, pgk->duration, pgk->pts, pgk->dts, pgk->size, pgk->pos);
+                    continue;
+                }
+                else
+                {
+                    FFLOGE("read video stream videostreamID:%d, duration:%lld, pts:%lld, dts:%lld, size:%d, pos:%lld",
+                           pgk->stream_index, pgk->duration, pgk->pts, pgk->dts, pgk->size, pgk->pos);
+                    ret = avcodec_send_packet(FP_Context.VCodecC, pgk);
+                    av_packet_unref(pgk);
+                    if(ret != 0)
+                    {
+                        FFLOGE("avcodec_send_packet fail, ret:%d, info:%s", ret, av_err2str(ret));
+                    }
+                    else
+                    {
+                        ret = avcodec_receive_frame(FP_Context.VCodecC, avFrame);
+                        if(ret != 0)
+                        {
+                            FFLOGE("avcodec_receive_frame info:%s", av_err2str(ret));
+                        }
+                        else
+                        {
+                            goto DecodeEND;
+                        }
+                    }
+                }
+            }
+        }
+    }
+DecodeEND:
+    av_packet_free(&pgk);
+    if(avFrame != NULL)
+        return avFrame;
+    return NULL;
+}
+
+void Use_FP_ReleaseDecodeFrame(AVFrame* avFrame)
+{
+    av_frame_free(&avFrame);
 }

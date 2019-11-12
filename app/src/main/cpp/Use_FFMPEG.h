@@ -2,8 +2,8 @@
 // Created by PLX on 2019/11/10.
 //
 
-#ifndef TESTFFMPEG_INITFFMPEG_H
-#define TESTFFMPEG_INITFFMPEG_H
+#ifndef USE_FFMPEG_H
+#define USE_FFMPEG_H
 #include <jni.h>
 #include <string>
 #include <android/log.h>
@@ -95,4 +95,6 @@ typedef struct FP_Context{
 int Init_FP_Context(const char* url, FP_Context& FP_Context);
 void QuitAndRelease_FP(FP_Context& FP_Context);
 int Init_FP_Codec(FP_Context& FP_Context, bool isHWdecode);
-#endif //TESTFFMPEG_INITFFMPEG_H
+AVFrame* Use_FP_GetDecodeFrame(FP_Context& FP_Context, AVMediaType PkgType);
+void Use_FP_ReleaseDecodeFrame(AVFrame* avFrame);
+#endif //USE_FFMPEG_H
