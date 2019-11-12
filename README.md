@@ -7,7 +7,7 @@ learn fp 4 an
   
   of course, we use NDK version android-ndk-r14b
   
-  in FFmpeg source code dir
+  copy make_Android_FFmpeg.sh to  FFmpeg source code dir
   
   ``
   sh make_Android_FFmpeg.sh
