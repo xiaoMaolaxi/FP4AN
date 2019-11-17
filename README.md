@@ -1,8 +1,13 @@
 # FP4AN
 learn fp 4 an
 
-# 2019-11-12
-  build with android studio
+# config compile system(ubuntu-18)
+  use sys_install.sh to init compile system
+  
+  ``
+  sudo su compile system
+  ``
+  
   use ffmpeg3.4 version and use make_Android_FFmpeg.sh for build ffmpeg for an
   
   of course, we use NDK version android-ndk-r14b
@@ -19,7 +24,7 @@ learn fp 4 an
   
   than ffmpeg for an libs will generated in ./android/armv7-a,
   
-  than copy libs to AS_proj/app/libs and heade file to AS_proj/include
+  and copy libs to AS_proj/app/libs and heade file to AS_proj/include
   
   
  
