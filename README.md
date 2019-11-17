@@ -5,7 +5,7 @@ learn fp 4 an
   use sys_install.sh to init compile system
   
   ``
-  sudo su compile system
+  sudo sh install.sh
   ``
   
   use ffmpeg3.4 version and use make_Android_FFmpeg.sh for build ffmpeg for an
