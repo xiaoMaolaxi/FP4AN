@@ -6,7 +6,7 @@
 #include "Use_FFMPEG.h"
 #include "../../../../include/libavcodec/avcodec.h"
 
-int Init_FP_Context(const char* url, FP_Context& FP_Context)
+int Init_FP_Context(const char* url, FP_Context& FP_Context, bool isHwDecode)
 {
 
     int ret;
@@ -27,14 +27,14 @@ int Init_FP_Context(const char* url, FP_Context& FP_Context)
         goto ERR_END;
 
     // default use sw decode
-    ret = Init_FP_Codec(FP_Context, false);
+    ret = Init_FP_Codec(FP_Context, isHwDecode);
     if(ret != 0)
         goto ERR_END;
     //av_log_set_callback(log_callback_test2);
     //av_dump_format(fmt_ctx, 0, url, 0);
     //av_dump_format(fmt_ctx, 1, url, 0);
     FFLOGE("fmt_ctx->duration:%lld, fmt_ctx->nb_streams:%d", (*fmt_ctx)->duration, (*fmt_ctx)->nb_streams);
-    FFLOGE("Init_FP_Context done, ret:%s", av_err2str(ret));
+    FFLOGE("Init_FP_Context done, isHwDecode:%d", isHwDecode);
 
     if(!avcodec_is_open(FP_Context.VCodecC))
     {
@@ -192,8 +192,8 @@ AVFrame* Use_FP_GetDecodeFrame(FP_Context& FP_Context, AVMediaType PkgType)
                 }
                 else
                 {
-                    FFLOGE("read video stream videostreamID:%d, duration:%lld, pts:%lld, dts:%lld, size:%d, pos:%lld",
-                           pgk->stream_index, pgk->duration, pgk->pts, pgk->dts, pgk->size, pgk->pos);
+                    //FFLOGE("read video stream videostreamID:%d, duration:%lld, pts:%lld, dts:%lld, size:%d, pos:%lld",
+                    //      pgk->stream_index, pgk->duration, pgk->pts, pgk->dts, pgk->size, pgk->pos);
                     ret = avcodec_send_packet(FP_Context.VCodecC, pgk);
                     av_packet_unref(pgk);
                     if(ret != 0)
@@ -217,7 +217,8 @@ AVFrame* Use_FP_GetDecodeFrame(FP_Context& FP_Context, AVMediaType PkgType)
         }
     }
 DecodeEND:
-    av_packet_free(&pgk);
+    if(pgk != NULL)
+        av_packet_free(&pgk);
     if(avFrame != NULL)
         return avFrame;
     return NULL;
@@ -225,5 +226,38 @@ DecodeEND:
 
 void Use_FP_ReleaseDecodeFrame(AVFrame* avFrame)
 {
-    av_frame_free(&avFrame);
+    if(avFrame != NULL)
+        av_frame_free(&avFrame);
+}
+
+int  Use_FP_SwsScaleFrame(FP_Context& FP_Context, void* OutPutRGB, int SwsOutWidth, int SwsOutHeight)
+{
+    SwsContext * VSwsCt = FP_Context.VSwsCt;
+    AVFrame*     VFrame = FP_Context.VFrame;
+
+    uint8_t *data[AV_NUM_DATA_POINTERS] = {0};
+    data[0] =(uint8_t *)OutPutRGB;
+    int lines[AV_NUM_DATA_POINTERS] = {0};
+    lines[0] = SwsOutWidth * 4;
+    int outHeiht = 0;
+
+    VSwsCt = sws_getCachedContext(VSwsCt,VFrame->width, VFrame->height,
+                                        (AVPixelFormat)VFrame->format,
+                                        SwsOutWidth, SwsOutHeight,
+                                        AV_PIX_FMT_RGBA, SWS_BICUBLIN,
+                                        0, 0, 0);
+    if(VSwsCt == NULL)
+    {
+        FFLOGE("sws_getCachedContext fail!");
+        return -1;
+    }
+
+    outHeiht = sws_scale(VSwsCt, (const uint8_t **)VFrame->data, VFrame->linesize,
+                          0, VFrame->height, data, lines);
+    if(outHeiht == 0)
+    {
+        FFLOGE("Use_FP_SwsScaleFrame fail!, height:%d", outHeiht);
+        return -1;
+    }
+    return 0;
 }

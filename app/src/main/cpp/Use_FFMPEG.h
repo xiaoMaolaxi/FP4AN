@@ -71,6 +71,7 @@ static float r2d(AVRational r)
 typedef struct FP_Context{
     const char* fileURL;
     AVFormatContext *fmt_ctx = NULL;
+    SwsContext * VSwsCt = NULL;
     AVDictionaryEntry *tag = NULL;
 
     int width = 0;
@@ -80,6 +81,7 @@ typedef struct FP_Context{
     int Videopixformat = 0;
     AVCodec* VCodec;
     AVCodecContext* VCodecC;
+    AVFrame* VFrame = NULL;
 
     float fps = 0;
     int AudioCodeID = 0;
@@ -90,11 +92,13 @@ typedef struct FP_Context{
     int Audioframe_size = 0;
     AVCodec* ACodec;
     AVCodecContext* ACodecC;
+    AVFrame* AFrame = NULL;
 } FP_Context;
 
-int Init_FP_Context(const char* url, FP_Context& FP_Context);
+int Init_FP_Context(const char* url, FP_Context& FP_Context, bool isHwDecode);
 void QuitAndRelease_FP(FP_Context& FP_Context);
 int Init_FP_Codec(FP_Context& FP_Context, bool isHWdecode);
 AVFrame* Use_FP_GetDecodeFrame(FP_Context& FP_Context, AVMediaType PkgType);
 void Use_FP_ReleaseDecodeFrame(AVFrame* avFrame);
+int  Use_FP_SwsScaleFrame(FP_Context& FP_Context, void* OutPutData, int SwsOutWidth, int SwsOutHeight);
 #endif //USE_FFMPEG_H
