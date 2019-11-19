@@ -216,7 +216,7 @@ struct SwrContext *swr_alloc(void);
  * @param[in,out]   s Swr context to initialize
  * @return AVERROR error code in case of failure.
  */
-int swr_init(struct SwrContext *s);
+SwrContext * swr_init(struct SwrContext *s);
 
 /**
  * Check whether an swr context has been initialized or not.
