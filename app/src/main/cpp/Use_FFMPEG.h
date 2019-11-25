@@ -7,6 +7,8 @@
 #include <jni.h>
 #include <string>
 #include <android/log.h>
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
 #include <iostream>
 
 extern "C"{
@@ -94,9 +96,12 @@ typedef struct FP_Context{
     int Audioframe_size = 0;
     AVCodec* ACodec;
     AVCodecContext* ACodecC;
-    struct SwrContext *aSRctx = NULL;
+    SwrContext *aSRctx = NULL;
     AVFrame* AFrame = NULL;
     char* Apcm = NULL;
+
+    ANativeWindow* nwin = NULL;
+    ANativeWindow_Buffer wbuf;
 
 } FP_Context;
 

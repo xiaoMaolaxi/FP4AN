@@ -2,6 +2,8 @@
 #include <string>
 #include <android/log.h>
 #include <iostream>
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
 #include <Use_FFMPEG.h>
 
 extern "C"{
@@ -50,6 +52,16 @@ Java_com_example_testffmpeg_MainActivity_open(JNIEnv *env, jobject instance, jst
                                               jobject handle) {
     const char *url = env->GetStringUTFChars(url_, 0);
 
+    env->ReleaseStringUTFChars(url_, url);
+    return 0;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_testffmpeg_PLXplayer_Open(JNIEnv *env, jobject instance, jstring url_,
+                                           jobject surface) {
+    const char *url = env->GetStringUTFChars(url_, 0);
+
     FFLOGE("line:%d, native c++ got file url:%s", __LINE__, url);
 
     int ret;
@@ -64,8 +76,6 @@ Java_com_example_testffmpeg_MainActivity_open(JNIEnv *env, jobject instance, jst
     int SwsOutHeight = 1920;
     int SwsOutWidth  = 1080;
 
-
-
     AVPacket* pgk = av_packet_alloc();
     AVFrame* avFrame = av_frame_alloc();
 
@@ -76,11 +86,19 @@ Java_com_example_testffmpeg_MainActivity_open(JNIEnv *env, jobject instance, jst
         goto MainEND;
     }
 
+    FP_Ct.nwin = ANativeWindow_fromSurface(env, surface);
+    if(FP_Ct.nwin == NULL)
+    {
+        FFLOGE("Get surface win fail");
+        goto MainEND;
+    }
+    ANativeWindow_setBuffersGeometry(FP_Ct.nwin, SwsOutWidth, SwsOutHeight, WINDOW_FORMAT_RGBA_8888);
+
     for(;;)
     {
         if(GetNowMs() - start >= 1000)
         {
-            FFLOGE("now decode fps is %d",frameCount/3);
+            //FFLOGE("now decode fps is %d",frameCount/3);
             start = GetNowMs();
             frameCount = 0;
         }
@@ -96,27 +114,30 @@ Java_com_example_testffmpeg_MainActivity_open(JNIEnv *env, jobject instance, jst
                 goto MainEND;
             }
             frameCount++;
+            ANativeWindow_lock(FP_Ct.nwin, &FP_Ct.wbuf, 0);
+            uint8_t * dst = (uint8_t*) FP_Ct.wbuf.bits;
+            memcpy(dst, FP_Ct.Vrgba, SwsOutWidth*SwsOutHeight*4);
+            ANativeWindow_unlockAndPost(FP_Ct.nwin);
         }
         else if(AVMEDIA_TYPE_AUDIO == ret)
         {
-                FP_Ct.AFrame = avFrame;
-                ret = Use_FP_SwCoverAFrame(FP_Ct, FP_Ct.Apcm);
-                if(ret != 0)
-                {
-                    FFLOGE("[Audio]SwsScaleFrame fail, ret: %d", ret);
-                    goto MainEND;
-                }
+            FP_Ct.AFrame = avFrame;
+            ret = Use_FP_SwCoverAFrame(FP_Ct, FP_Ct.Apcm);
+            if(ret != 0)
+            {
+                FFLOGE("[Audio]SwsScaleFrame fail, ret: %d", ret);
+                goto MainEND;
+            }
         }
         else{
             goto MainEND;
         }
     }
 
-MainEND:
+    MainEND:
     if(FP_Ct.VFrame)
         Use_FP_ReleaseDecodeFrame(FP_Ct.VFrame);
     QuitAndRelease_FP(FP_Ct);
     //delete []rgba;
     env->ReleaseStringUTFChars(url_, url);
-    return 0;
 }
