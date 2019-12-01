@@ -251,7 +251,7 @@ AVMediaType Use_FP_GetDecodeFrame(FP_Context& FP_Ct, AVFrame* outFrame)
                     ret = avcodec_receive_frame(FP_Ct.VCodecC, avFrame);
                     if(ret != 0)
                     {
-                        FFLOGE("[Video]avcodec_receive_frame info:%s", av_err2str(ret));
+                        //FFLOGE("[Video]avcodec_receive_frame info:%s", av_err2str(ret));
                         break;
                     }
                     else

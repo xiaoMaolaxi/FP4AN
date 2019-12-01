@@ -5,6 +5,7 @@
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include <Use_FFMPEG.h>
+#include <OpenSLtestPCMPlayer.h>
 
 extern "C"{
 #include "libavformat/avformat.h"
@@ -68,8 +69,6 @@ Java_com_example_testffmpeg_PLXplayer_Open(JNIEnv *env, jobject instance, jstrin
     //int isHwDecode = true;
     int isHwDecode = false;
     FP_Context FP_Ct;
-    //AVFormatContext *fmt_ctx = FP_Ct.fmt_ctx;
-    //AVPacket* pgk = av_packet_alloc();
 
     long long start = GetNowMs();
     int frameCount = 0;
@@ -78,6 +77,8 @@ Java_com_example_testffmpeg_PLXplayer_Open(JNIEnv *env, jobject instance, jstrin
 
     AVPacket* pgk = av_packet_alloc();
     AVFrame* avFrame = av_frame_alloc();
+
+    OpenSLtestPCMPlayer();
 
     ret = Init_FP_Context(url, FP_Ct, isHwDecode);
     if(ret != 0)
