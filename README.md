@@ -25,6 +25,20 @@ learn fp 4 an
   than ffmpeg for an libs will generated in ./android/armv7-a,
   
   and copy libs to AS_proj/app/libs and heade file to AS_proj/include
-  
-  
+
+
+# 2019-12-5
+### add YUVplayer exp, use OpenGL play YUV420P format
+
+# 2019-12-1
+### add PCMplayer exp, use OpenSL play 4418000 samplerate
+
+# 2019-11-25
+### add video sw render
+
+# 2019-11-19
+### add audio sw resample
+
+# 2019-11-17
+### add video sw scale
  
