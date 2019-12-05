@@ -6,6 +6,7 @@
 #include <android/native_window_jni.h>
 #include <Use_FFMPEG.h>
 #include <OpenSLtestPCMPlayer.h>
+#include "OpenGLtestYUVplayer.h"
 
 extern "C"{
 #include "libavformat/avformat.h"
@@ -78,7 +79,7 @@ Java_com_example_testffmpeg_PLXplayer_Open(JNIEnv *env, jobject instance, jstrin
     AVPacket* pgk = av_packet_alloc();
     AVFrame* avFrame = av_frame_alloc();
 
-    OpenSLtestPCMPlayer();
+    //OpenSLtestPCMPlayer();
 
     ret = Init_FP_Context(url, FP_Ct, isHwDecode);
     if(ret != 0)
@@ -93,6 +94,8 @@ Java_com_example_testffmpeg_PLXplayer_Open(JNIEnv *env, jobject instance, jstrin
         FFLOGE("Get surface win fail");
         goto MainEND;
     }
+    OpenGLtestYUVplayer("/storage/sdcard0/Movies/29265300/out.yuv", FP_Ct.nwin);
+
     ANativeWindow_setBuffersGeometry(FP_Ct.nwin, SwsOutWidth, SwsOutHeight, WINDOW_FORMAT_RGBA_8888);
 
     for(;;)

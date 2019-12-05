@@ -17,6 +17,8 @@ public class PLXplayer extends GLSurfaceView implements Runnable, SurfaceHolder.
         //Open("/sdcard/Movies/29265300/英雄时刻_20190105-21点12分41s.avi", getHolder().getSurface());
         Open("/sdcard/Movies/29265300/video1.mp4",
                 getHolder().getSurface());
+        //Open("/sdcard/Movies/29265300/out.yuv",
+        //        getHolder().getSurface());
     }
 
     @Override

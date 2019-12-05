@@ -42,6 +42,7 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         native-lib.cpp
         OpenSLtesetPCMplayer.cpp
+        OpenGLtestYUVplayer.cpp
         Use_FFMPRG.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
@@ -62,8 +63,13 @@ find_library( # Sets the name of the path variable.
 
 target_link_libraries( # Specifies the target library.
         native-lib
+        # audio output
         OpenSLES
+        # video output
+        GLESv2
+        EGL
         android
+        ##############
         avcodec
         avformat
         avutil
